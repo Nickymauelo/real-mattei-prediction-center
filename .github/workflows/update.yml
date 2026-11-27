@@ -19,6 +19,8 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.clock.outputs.run }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -50,7 +52,7 @@ jobs:
           path: docs
   deploy:
     needs: refresh
-    if: always() && !cancelled()
+    if: always() && !cancelled() && needs.refresh.outputs.run == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

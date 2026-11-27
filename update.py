@@ -51,9 +51,14 @@ def main():
  for g in predicted:
   i,j=idx[g['home']],idx[g['away']];a,b=rng.poisson(g['expected'][0],20000),rng.poisson(g['expected'][1],20000);pts[:,i]+=3*(a>b)+(a==b);pts[:,j]+=3*(b>a)+(a==b);gd[:,i]+=a-b;gd[:,j]+=b-a
  order=np.argsort(-(pts*10000+gd+rng.random(pts.shape)),axis=1); table=[dict(team=t,points=stats[t][0],gf=stats[t][1],ga=stats[t][2],played=stats[t][3],projected=round(float(pts[:,i].mean()),1),title=round(float((order[:,0]==i).mean()*100),1),attack=round(float(np.exp(z[2+i])*100)),defense=round(float(np.exp(-z[16+i])*100))) for i,t in enumerate(TEAMS)];table.sort(key=lambda t:(-t['points'],t['ga']-t['gf']))
+ for i,t in enumerate(TEAMS):
+  row=next(x for x in table if x['team']==t)
+  row.update(top3=round(float((order[:,:3]==i).any(axis=1).mean()*100),1),top5=round(float((order[:,:5]==i).any(axis=1).mean()*100),range=[int(np.quantile(pts[:,i],.1)),int(np.quantile(pts[:,i],.9))],position=int(np.argmax(np.bincount(np.where(order==i)[1],minlength=14)))+1)
+  previous=next((x for x in old.get('table',[]) if x['team']==t),{})
+  row['titleChange']=round(row['title']-previous.get('title',row['title']),1)
  archive=old.get('archive',{}); current=max((g['round'] for g in done),default=1); current=min(current+int(all(g['score'] is not None for g in games if g['round']==current)),26)
  for g in predicted:
   if g['round'] in (current,current+1): archive.setdefault(str(g['round'])+'|'+g['home'],g)
  history=[dict(v,actual=g['score']) for g in done if (v:=archive.get(str(g['round'])+'|'+g['home']))]
- data=dict(demo=False,updated=datetime.datetime.now(ZoneInfo('Europe/Rome')).isoformat(),round=current,table=table,matches=[g for g in predicted if g['round']==current],archive=archive,history=history,played=len(done));tmp=path.with_suffix('.tmp');tmp.write_text(json.dumps(data,ensure_ascii=False));tmp.replace(path)
+ data=dict(demo=False,updated=datetime.datetime.now(ZoneInfo('Europe/Rome')).isoformat(),round=current,table=table,matches=[g for g in predicted if g['round']==current],archive=archive,history=history,played=len(done),games=games,future=predicted,players=[],discipline=[],coverage={'scorers':None,'discipline':None},schema=2);tmp=path.with_suffix('.tmp');tmp.write_text(json.dumps(data,ensure_ascii=False));tmp.replace(path)
 if __name__=='__main__':main()

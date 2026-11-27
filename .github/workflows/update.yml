@@ -1,7 +1,10 @@
 name: Real Mattei daily refresh
 on:
   schedule:
-    - cron: '0 22,23 * * *'
+    - cron: '0 0 * * *'
+      timezone: 'Europe/Rome'
+    - cron: '17 1 * * *'
+      timezone: 'Europe/Rome'
   workflow_dispatch:
   push:
     branches: [main]
@@ -26,16 +29,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Determine midnight in Rome
+      - name: Enable refresh regardless of queue delay
         id: clock
-        env:
-          EVENT: ${{ github.event_name }}
-        run: |
-          if [ "$EVENT" != schedule ] || [ "$(TZ=Europe/Rome date +%H)" = "00" ]; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          fi
+        run: echo 'run=true' >> "$GITHUB_OUTPUT"
       - if: steps.clock.outputs.run == 'true'
         run: pip install requests beautifulsoup4 numpy scipy
       - if: steps.clock.outputs.run == 'true'

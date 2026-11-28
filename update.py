@@ -53,7 +53,7 @@ def main():
  order=np.argsort(-(pts*10000+gd+rng.random(pts.shape)),axis=1); table=[dict(team=t,points=stats[t][0],gf=stats[t][1],ga=stats[t][2],played=stats[t][3],projected=round(float(pts[:,i].mean()),1),title=round(float((order[:,0]==i).mean()*100),1),attack=round(float(np.exp(z[2+i])*100)),defense=round(float(np.exp(-z[16+i])*100))) for i,t in enumerate(TEAMS)];table.sort(key=lambda t:(-t['points'],t['ga']-t['gf']))
  for i,t in enumerate(TEAMS):
   row=next(x for x in table if x['team']==t)
-  row.update(top3=round(float((order[:,:3]==i).any(axis=1).mean()*100),1),top5=round(float((order[:,:5]==i).any(axis=1).mean()*100),range=[int(np.quantile(pts[:,i],.1)),int(np.quantile(pts[:,i],.9))],position=int(np.argmax(np.bincount(np.where(order==i)[1],minlength=14)))+1)
+  row.update(top3=round(float((order[:,:3]==i).any(axis=1).mean()*100),1),top5=round(float((order[:,:5]==i).any(axis=1).mean()*100),1),range=[int(np.quantile(pts[:,i],.1)),int(np.quantile(pts[:,i],.9))],position=int(np.argmax(np.bincount(np.where(order==i)[1],minlength=14)))+1)
   previous=next((x for x in old.get('table',[]) if x['team']==t),{})
   row['titleChange']=round(row['title']-previous.get('title',row['title']),1)
  archive=old.get('archive',{}); current=max((g['round'] for g in done),default=1); current=min(current+int(all(g['score'] is not None for g in games if g['round']==current)),26)
